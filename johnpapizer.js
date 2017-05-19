@@ -130,8 +130,10 @@ function validateFile(input, file, method) {
 
        if(!htmlECMAScript.resp.vmUsed) {
             htmlECMAScript.resp.errors.push({
+                title: utils.getMessages().noVmInController.title,
                 message: utils.getMessages().noVmInController.body,
-                hint: utils.getMessages().noVmInController.hint
+                hint: utils.getMessages().noVmInController.hint,
+                why:  utils.getMessages().noVmInController.why
             });
        }
    }
@@ -139,6 +141,17 @@ function validateFile(input, file, method) {
    if (method === 'directive') {
        if (htmlECMAScript.resp.restrictEA) {
             htmlECMAScript.resp.errors.push(htmlECMAScript.resp.restrictEA);
+       }
+   }
+
+   if (method === 'route') {
+       if(!htmlECMAScript.resp.controllerAsVM) {
+            htmlECMAScript.resp.errors.push({
+                title: utils.getMessages().noVmInRoute.title,
+                message: utils.getMessages().noVmInRoute.body,
+                hint: utils.getMessages().noVmInRoute.hint,
+                why: utils.getMessages().noVmInRoute.why
+            });
        }
    }
 
@@ -150,12 +163,22 @@ function validateFile(input, file, method) {
    }
 
    htmlECMAScript.resp.errors.forEach( function(error) {
+       if (error.title) {
+        console.log(TAB + yellow.bold(error.title));
+       }
        if (error.line && error.body) {
-        console.log(TAB + white.bold('line: '+ error.line) + '. ' + error.body);
+        console.log(TAB + yellow.bold('line: '+ error.line) + '. ' + white.bold(error.body));
        }
        console.log(TAB + cyan.bold(error.message));
        console.log(TAB + cyan.bold(error.hint));
        console.log(LINE_BREAK);
+       if(error.why && error.why.length > 0) {
+           console.log(TAB + white.bold('Why?'));
+           _.forEach(error.why, function(w){
+                console.log(TAB + w);
+           })
+           console.log(LINE_BREAK);
+       }
    }, this); 
 
    return htmlECMAScript.resp.errors.length > 0;

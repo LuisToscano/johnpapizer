@@ -25,47 +25,23 @@ ECMAListener = function(tokenStream) {
 ECMAListener.prototype = Object.create(ECMAScriptListener.prototype);
 ECMAListener.prototype.constructor = ECMAListener;
 
-// override default listener behavior
-ECMAListener.prototype.enterVariableDeclaration = function(ctx) {
-    
-    var singleExp = ctx.initialiser().singleExpression().getText();
-    var identifier = ctx.Identifier().getText();
-    var method = utils.getAngularMethod(singleExp);
-
-    if(singleExp.startsWith('angular.') && method !== null) {
-        this.resp.errors.push(utils.buildError(ctx, this.tokenStream, messages.setAngularToVar.body,
-        sprintf(messages.setAngularToVar.hint, {
-            method: utils.getAngularMethod(ctx.getText()),
-            wrong: identifier
-        })));
-    }
-
-    if(singleExp.startsWith('function')) {
-        this.resp.errors.push(utils.buildError(ctx, this.tokenStream, messages.setFunctionToVar.body,
-        sprintf(messages.setFunctionToVar.hint, {
-            id: identifier
-        })));
-    }
-
-    if(identifier === 'vm' && singleExp === 'this') {
-        this.resp.vmUsed = true;
-    }
-};
-
 ECMAScriptListener.prototype.enterMemberDotExpression = function(ctx) {
     
     var singleExp = ctx.singleExpression().getText();
     var identifier = ctx.identifierName().getText();
+
     if(singleExp.startsWith('$scope') && !identifier.startsWith('$')) {
         this.resp.errors.push(utils.buildError(ctx, this.tokenStream, messages.setScopeVar.body,
         sprintf(messages.setScopeVar.hint, {
             id: identifier
-        })));
+        }),
+        messages.setScopeVar.why
+        ));
     }
 
     if(singleExp.startsWith('$http')) {
         this.resp.httpUsed = utils.buildError(ctx, this.tokenStream, messages.httpInController.body,
-        messages.httpInController.hint);
+        messages.httpInController.hint,  messages.httpInController.why);
     }
 };
 
@@ -82,7 +58,9 @@ ECMAScriptListener.prototype.enterArgumentList = function(ctx) {
             this.resp.errors.push(utils.buildError(ctx.parentCtx.parentCtx, this.tokenStream,
             messages.namedFunctions.body, sprintf(messages.namedFunctions.hint, {
                 parent: parentTxt.replace(subStr, 'myNamedFunction')
-            })));
+            }),
+            messages.namedFunctions.why
+            ));
         }
     } else {
         if(method){
@@ -90,7 +68,9 @@ ECMAScriptListener.prototype.enterArgumentList = function(ctx) {
             messages.getAngularFromVar.body, sprintf(messages.getAngularFromVar.hint, {
                 method: method,
                 wrong: singleExp
-            })));
+            }),
+            messages.getAngularFromVar.why
+            ));
         }
     }
 
@@ -112,21 +92,57 @@ ECMAScriptListener.prototype.enterArgumentList = function(ctx) {
             messages.inLineDependencies.body, sprintf(messages.inLineDependencies.hint, {
                 method: method,
                 args: strArgs
-            })));
+            }),
+            messages.inLineDependencies.why
+            ));
         }
     }
 };
 
 ECMAScriptListener.prototype.enterPropertyExpressionAssignment = function(ctx) {
     
-    if(ctx.propertyName().getText() === 'controllerAs' && ctx.singleExpression().getText() === 'vm'){
+    if(ctx.propertyName().getText() === 'controllerAs' && ctx.singleExpression().getText() === '\'vm\''){
         this.resp.controllerAsVM = true;
     }
 
-    if(ctx.propertyName().getText() === 'restrict' && ctx.singleExpression().getText() === 'EA'){
+    if(ctx.propertyName().getText() === 'restrict' && (ctx.singleExpression().getText() !== '\'E\'' && ctx.singleExpression().getText() !== '\'EA\'')) {
         this.resp.restrictEA =  utils.buildError(ctx, this.tokenStream, messages.noEAInDirective.body,
-        messages.noEAInDirective.hint);
+        sprintf(messages.noEAInDirective.hint, {
+            wrong: ctx.singleExpression().getText()
+        }), messages.noEAInDirective.why);
     }
 };
+
+ECMAScriptListener.prototype.enterAssignmentExpression = function(ctx) {
+    
+    var expressionSequence = ctx.expressionSequence().getText();
+    var singleExpression = ctx.singleExpression().getText();
+    var method = utils.getAngularMethod(expressionSequence);
+
+    if(expressionSequence.startsWith('angular.') && method !== null) {
+        this.resp.errors.push(utils.buildError(ctx, this.tokenStream, messages.setAngularToVar.body,
+        sprintf(messages.setAngularToVar.hint, {
+            method: utils.getAngularMethod(ctx.getText()),
+            wrong: singleExpression
+        }),
+        messages.setAngularToVar.why
+        ));
+    }
+
+    if(expressionSequence.startsWith('function')) {
+        this.resp.errors.push(utils.buildError(ctx, this.tokenStream, messages.setFunctionToVar.body,
+        sprintf(messages.setFunctionToVar.hint, {
+            id: singleExpression
+        }),
+        messages.setFunctionToVar.why
+        ));
+    }
+
+    if(singleExpression === 'vm' && expressionSequence === 'this') {
+        this.resp.vmUsed = true;
+    }
+
+};
+
 
 exports.ECMAListener = ECMAListener;
