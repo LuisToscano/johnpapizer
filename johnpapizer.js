@@ -20,6 +20,7 @@ const LINE_BREAK = '\n';
 const CONFIG_FILE = 'papa.config'
 
 exports.johnpapizer = johnpapizer;
+var config = {};
 
 function johnpapizer() {
     var url = path.resolve(process.cwd(), './' + CONFIG_FILE);
@@ -29,10 +30,13 @@ function johnpapizer() {
                 console.log(red.bold('missing configuration file: '), url);
                 reject(err);
             }
-            var config = JSON.parse(data);
+            config = JSON.parse(data);
             var angularUrl = path.resolve(process.cwd(), './' + config.url);
             validateFiles(angularUrl)
             .then(function(resp) {
+                if(!resp){
+                    console.log(green.bold(LINE_BREAK + '0 errors'));
+                }
                 resolve(resp);
             })
             .catch(function(err) {
@@ -59,13 +63,7 @@ function validateFiles(dir) {
 
             Promise.all(promises)
             .then(function(values) {
-                _.forEach(values, function(value) {
-                    if(value){
-                        isError = false;
-                        return false;
-                    }
-                });
-                resolve(isError);
+                resolve(_.indexOf(values, true) >= 0);
             })
             .catch(function(err) {
                 reject(err);
@@ -93,7 +91,7 @@ function listAllFiles(dir) {
                 } else {
                     var method = utils.getAngularMethod(file);
                     if (file.endsWith('.js') && !file.endsWith('spec.js') &&
-                        !file.endsWith('min.js') && method !== null) {
+                        !file.endsWith('min.js') && method !== null && !inIgnore(file)) {
                         files.push(fn);
                     }
                 }
@@ -182,4 +180,12 @@ function validateFile(input, file, method) {
    }, this); 
 
    return htmlECMAScript.resp.errors.length > 0;
+}
+
+function inIgnore(file) {
+    if (config.ignore && Array.isArray(config.ignore) && config.ignore.length > 0) {
+        return _.indexOf(config.ignore, file) >= 0;
+    } else{
+        return false;
+    }
 }

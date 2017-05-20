@@ -50,7 +50,7 @@ function getMessages() {
         },
         setFunctionToVar: {
             body: 'Avoid saving functions to variables directly',
-            hint: 'Define them below the bindable members instead -> var %(id)s = myFunction; . . . function myFunction() {}',
+            hint: 'Define them below the bindable members instead -> %(id)s = myFunction; . . . function myFunction() {}',
             why: ['Placing the implementation details of a function later in the file moves that complexity out of view so you can see the important stuff up top',
                   'Placing bindable members at the top makes it easy to read and helps you instantly identify which members of the controller can be bound and used in the View',
                   '']
@@ -83,8 +83,8 @@ function getMessages() {
         noVmInController: {
             title: 'Reserved word "this" used in controller',
             body: 'Use a capture variable for "this" when using the controllerAs syntax',
-            hint: 'Use var vm = this; at the top of your controller',
-            why: ['The this keyword is contextual and when used within a function inside a controller may change its context. Capturing the context of this avoids encountering this problem']
+            hint: 'Use var vm = this; at the top of your controller and assign variables as vm. instead of this.',
+            why: ['The "this" keyword is contextual and when used within a function inside a controller may change its context. Capturing the context of this avoids encountering this problem']
         },
         noEAInDirective: {
             body: 'When creating a directive that makes sense as a stand-alone element, allow restrict E and optionally restrict A.',

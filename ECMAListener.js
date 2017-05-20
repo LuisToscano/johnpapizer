@@ -51,27 +51,30 @@ ECMAScriptListener.prototype.enterArgumentList = function(ctx) {
     var singleExp = ctx.parentCtx.parentCtx.singleExpression().getText();
     var method = utils.getAngularMethod(singleExp);
 
-    if (parentTxt.startsWith('angular.')) {
-        var idx = ctx.getText().indexOf('function(');
-        if (idx >= 0) {
-            var subStr = ctx.getText().substring(idx, ctx.getText().lastIndexOf('}') + 1);
-            this.resp.errors.push(utils.buildError(ctx.parentCtx.parentCtx, this.tokenStream,
-            messages.namedFunctions.body, sprintf(messages.namedFunctions.hint, {
-                parent: parentTxt.replace(subStr, 'myNamedFunction')
-            }),
-            messages.namedFunctions.why
-            ));
+    var idx = ctx.getText().indexOf('function(');
+    if (idx >= 0) {
+        var subStr = ctx.getText().substring(idx, ctx.getText().lastIndexOf('}') + 1);
+        this.resp.errors.push(utils.buildError(ctx.parentCtx.parentCtx, this.tokenStream,
+        messages.namedFunctions.body, sprintf(messages.namedFunctions.hint, {
+            parent: parentTxt.replace(subStr, 'myNamedFunction')
+        }),
+        messages.namedFunctions.why
+        ));
+    }
+
+    if(!parentTxt.startsWith('angular.') && method){
+        if(singleExp.indexOf('module(') && method !== 'module'){
+            var modules = singleExp.substring(singleExp.indexOf('module(') + 7, singleExp.indexOf(')'));
+            method = 'module('+ modules + ').' + method;
         }
-    } else {
-        if(method){
-            this.resp.errors.push(utils.buildError(ctx.parentCtx.parentCtx, this.tokenStream,
-            messages.getAngularFromVar.body, sprintf(messages.getAngularFromVar.hint, {
-                method: method,
-                wrong: singleExp
-            }),
-            messages.getAngularFromVar.why
-            ));
-        }
+
+        this.resp.errors.push(utils.buildError(ctx.parentCtx.parentCtx, this.tokenStream,
+        messages.getAngularFromVar.body, sprintf(messages.getAngularFromVar.hint, {
+            method: method,
+            wrong: singleExp
+        }),
+        messages.getAngularFromVar.why
+        ));
     }
 
     if(method !== null) {
@@ -111,6 +114,15 @@ ECMAScriptListener.prototype.enterPropertyExpressionAssignment = function(ctx) {
             wrong: ctx.singleExpression().getText()
         }), messages.noEAInDirective.why);
     }
+
+    if (ctx.singleExpression().getText().startsWith('function')) {
+        this.resp.errors.push(utils.buildError(ctx, this.tokenStream, messages.setFunctionToVar.body,
+        sprintf(messages.setFunctionToVar.hint, {
+            id: ctx.propertyName().getText()
+        }),
+        messages.setFunctionToVar.why
+        ));
+    }
 };
 
 ECMAScriptListener.prototype.enterAssignmentExpression = function(ctx) {
@@ -119,17 +131,7 @@ ECMAScriptListener.prototype.enterAssignmentExpression = function(ctx) {
     var singleExpression = ctx.singleExpression().getText();
     var method = utils.getAngularMethod(expressionSequence);
 
-    if(expressionSequence.startsWith('angular.') && method !== null) {
-        this.resp.errors.push(utils.buildError(ctx, this.tokenStream, messages.setAngularToVar.body,
-        sprintf(messages.setAngularToVar.hint, {
-            method: utils.getAngularMethod(ctx.getText()),
-            wrong: singleExpression
-        }),
-        messages.setAngularToVar.why
-        ));
-    }
-
-    if(expressionSequence.startsWith('function')) {
+    if (expressionSequence.startsWith('function')) {
         this.resp.errors.push(utils.buildError(ctx, this.tokenStream, messages.setFunctionToVar.body,
         sprintf(messages.setFunctionToVar.hint, {
             id: singleExpression
@@ -138,11 +140,39 @@ ECMAScriptListener.prototype.enterAssignmentExpression = function(ctx) {
         ));
     }
 
-    if(singleExpression === 'vm' && expressionSequence === 'this') {
+    if (singleExpression.startsWith('this.')) {
+        this.resp.errors.push(utils.buildError(ctx, this.tokenStream, messages.noVmInController.body,
+        messages.noVmInController.hint,messages.noVmInController.why));
+    }
+};
+
+ECMAScriptListener.prototype.enterVariableDeclaration = function(ctx) {
+    var identifier = ctx.Identifier().getText();
+    var initialiser = ctx.initialiser().getText();
+    var method = utils.getAngularMethod(initialiser);
+
+    if (initialiser.startsWith('=angular.') && method !== null) {
+        this.resp.errors.push(utils.buildError(ctx, this.tokenStream, messages.setAngularToVar.body,
+        sprintf(messages.setAngularToVar.hint, {
+            method: utils.getAngularMethod(ctx.getText()),
+            wrong: initialiser
+        }),
+        messages.setAngularToVar.why
+        ));
+    }
+
+    if(identifier === 'vm' && initialiser.indexOf('this') >= 0) {
         this.resp.vmUsed = true;
     }
 
+    if (initialiser.startsWith('=function')) {
+        this.resp.errors.push(utils.buildError(ctx, this.tokenStream, messages.setFunctionToVar.body,
+        sprintf(messages.setFunctionToVar.hint, {
+            id: identifier
+        }),
+        messages.setFunctionToVar.why
+        ));
+    }
 };
-
 
 exports.ECMAListener = ECMAListener;
