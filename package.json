@@ -1,18 +1,13 @@
 {
-  "name": "johnpapizer",
-  "version": "1.0.0",
-  "description": "",
-  "main": "papa.js",
+  "name": "helloWorld",
+  "description": "helloWorld Project Generated from HotTowel Angular",
+  "version": "0.0.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "init": "npm install",
+    "start": "node src/server/app.js",
+    "test": "gulp test"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "antlr4": "^4.7.0",
-    "chalk": "^1.1.3",
-    "lodash": "^4.17.4",
-    "promise": "^7.1.1",
-    "sprintf": "^0.1.5"
+    "johnpapizer": "https://github.com/LuisToscano/johnpapizer.git"
   }
 }
