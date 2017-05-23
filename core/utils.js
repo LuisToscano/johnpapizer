@@ -40,7 +40,7 @@ function getMessages() {
     return {
         setAngularToVar: {
             body: 'Avoid declaring angular components into variables',
-            hint: 'Use angular.module() getter instead of saving into %(variable)$',
+            hint: 'Use angular.module() getter instead of saving into %(variable)s',
             why: ['This produces more readable code and avoids variable collisions or leaks']
         },
         getAngularFromVar: {
