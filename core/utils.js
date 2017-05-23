@@ -94,9 +94,9 @@ function getMessages() {
         },
         noVmInRoute: {
             title: 'ControllerAs syntax not used in route or directive file',
-            body: 'Avoid not defining controllers along with their routes',
+            body: 'Avoid not defining controllers along in routes or directives',
             hint: 'Use a controllerAs: vm syntax in route and directive files',
-            why: ['Pairing the controller in the route allows different routes to invoke different pairs of controllers and views. When controllers are assigned in the view using ng-controller, that view is always associated with the same controller']
+            why: ['Pairing the controller allows different routes or directives to invoke different pairs of controllers and views. When controllers are assigned in the view using ng-controller, that view is always associated with the same controller']
         },
         scopeNotBoundToController: {
             title: 'Scope is not bound to controller',
