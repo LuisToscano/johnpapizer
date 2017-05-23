@@ -15,7 +15,8 @@ ECMAListener = function(tokenStream) {
         vmUsed: false,
         httpUsed: false,
         controllerAsVM: false,
-        restrictEA: false
+        restrictEA: false,
+        bindToController: false
     };
     ECMAScriptListener.call(this); // inherit default listener
     return this;
@@ -106,6 +107,10 @@ ECMAScriptListener.prototype.enterPropertyExpressionAssignment = function(ctx) {
     
     if(ctx.propertyName().getText() === 'controllerAs' && ctx.singleExpression().getText() === '\'vm\''){
         this.resp.controllerAsVM = true;
+    }
+
+    if(ctx.propertyName().getText() === 'bindToController' && ctx.singleExpression().getText() === 'true'){
+        this.resp.bindToController = true;
     }
 
     if(ctx.propertyName().getText() === 'restrict' && (ctx.singleExpression().getText() !== '\'E\'' && ctx.singleExpression().getText() !== '\'EA\'')) {

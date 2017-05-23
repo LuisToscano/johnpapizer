@@ -87,7 +87,7 @@ function getMessages() {
             why: ['The "this" keyword is contextual and when used within a function inside a controller may change its context. Capturing the context of this avoids encountering this problem']
         },
         noEAInDirective: {
-            body: 'When creating a directive that makes sense as a stand-alone element, allow restrict E and optionally restrict A.',
+            body: 'When creating a directive that makes sense as a stand-alone element, allow restrict E and optionally restrict EA.',
             hint: 'Use restrict: \'EA\' or \'E\' instead of %(wrong)s',
             why: ['While we can allow the directive to be used as a class, if the directive is truly acting as an element it makes more sense as an element or at least as an attribute',
                   'General guideline is allow EA but lean towards implementing as an element when it\'s stand-alone and as an attribute when it enhances its existing DOM element']
@@ -95,8 +95,14 @@ function getMessages() {
         noVmInRoute: {
             title: 'ControllerAs syntax not used in route file',
             body: 'Avoid not defining controllers along with their routes',
-            hint: 'Use a controllerAs: vm syntax in the routes file',
+            hint: 'Use a controllerAs: vm syntax in route and directive files',
             why: ['Pairing the controller in the route allows different routes to invoke different pairs of controllers and views. When controllers are assigned in the view using ng-controller, that view is always associated with the same controller']
+        },
+        scopeNotBoundToController: {
+            title: 'Scope is not bound to controller',
+            body: 'Avoid not binding scope to controller when using controllerAs syntax in a directive',
+            hint: 'Use a bindToController: true in directive files',
+            why: ['The direcive scope is isolated', 'It makes it easy to bind outer scope to the directive\'s controller scope', 'scope variables passed by the directive\'s attributes are not accessible from vm in the controller otherwise']
         }
     }
 }

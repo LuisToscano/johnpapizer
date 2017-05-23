@@ -24,6 +24,9 @@ var config = {};
 
 function johnpapizer() {
     var url = path.resolve(process.cwd(), './' + CONFIG_FILE);
+    console.log(LINE_BREAK);
+    console.log('Veryfing AngularJS Implementation according to John Papa\'s style guide ...');
+    console.log(white.bold('For more information go to: ') + 'https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md' + LINE_BREAK);
     return new Promise (function(resolve, reject) {
         fs.readFile(url,'utf8', function(err, data) {
             if(err) {
@@ -140,6 +143,24 @@ function validateFile(input, file, method) {
        if (htmlECMAScript.resp.restrictEA) {
             htmlECMAScript.resp.errors.push(htmlECMAScript.resp.restrictEA);
        }
+
+        if(!htmlECMAScript.resp.controllerAsVM) {
+            htmlECMAScript.resp.errors.push({
+                title: utils.getMessages().noVmInRoute.title,
+                message: utils.getMessages().noVmInRoute.body,
+                hint: utils.getMessages().noVmInRoute.hint,
+                why: utils.getMessages().noVmInRoute.why
+            });
+       }
+
+        if(!htmlECMAScript.resp.bindToController) {
+            htmlECMAScript.resp.errors.push({
+                title: utils.getMessages().scopeNotBoundToController.title,
+                message: utils.getMessages().scopeNotBoundToController.body,
+                hint: utils.getMessages().scopeNotBoundToController.hint,
+                why: utils.getMessages().scopeNotBoundToController.why
+            });
+       }
    }
 
    if (method === 'route') {
@@ -177,7 +198,7 @@ function validateFile(input, file, method) {
            })
            console.log(LINE_BREAK);
        }
-   }, this); 
+   }, this);
 
    return htmlECMAScript.resp.errors.length > 0;
 }
