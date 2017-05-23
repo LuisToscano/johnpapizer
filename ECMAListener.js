@@ -159,8 +159,7 @@ ECMAScriptListener.prototype.enterVariableDeclaration = function(ctx) {
     if (initialiser.startsWith('=angular.') && method !== null) {
         this.resp.errors.push(utils.buildError(ctx, this.tokenStream, messages.setAngularToVar.body,
         sprintf(messages.setAngularToVar.hint, {
-            method: utils.getAngularMethod(ctx.getText()),
-            wrong: initialiser
+            variable: identifier
         }),
         messages.setAngularToVar.why
         ));

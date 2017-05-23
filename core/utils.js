@@ -40,12 +40,12 @@ function getMessages() {
     return {
         setAngularToVar: {
             body: 'Avoid declaring angular components into variables',
-            hint: 'Use angular.%(method)s() instead of %(wrong)s.%(method)s()',
+            hint: 'Use angular.module() getter instead of saving into %(variable)$',
             why: ['This produces more readable code and avoids variable collisions or leaks']
         },
         getAngularFromVar: {
             body: 'Avoid using a variable and instead use chaining with the getter syntax',
-            hint: 'Use angular.%(method)s instead of %(wrong)s',
+            hint: 'Use angular.%(method)s instead of %(wrong)s.%(method)s()',
             why: ['This produces more readable code and avoids variable collisions or leaks']
         },
         setFunctionToVar: {
@@ -93,7 +93,7 @@ function getMessages() {
                   'General guideline is allow EA but lean towards implementing as an element when it\'s stand-alone and as an attribute when it enhances its existing DOM element']
         },
         noVmInRoute: {
-            title: 'ControllerAs syntax not used in route file',
+            title: 'ControllerAs syntax not used in route or directive file',
             body: 'Avoid not defining controllers along with their routes',
             hint: 'Use a controllerAs: vm syntax in route and directive files',
             why: ['Pairing the controller in the route allows different routes to invoke different pairs of controllers and views. When controllers are assigned in the view using ng-controller, that view is always associated with the same controller']
